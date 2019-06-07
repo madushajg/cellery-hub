@@ -30,6 +30,14 @@ public type OrgResponse record {
     string createdTimestamp;
 };
 
+public type ArtifactResponse record {
+    string description;
+    int pullCount;
+    string lastAuthor;
+    string updatedTimestamp;
+    byte[] metadata;
+};
+
 public type Image record {
     string artifactImageId;
     string orgName;
@@ -62,7 +70,7 @@ public type ImageVersion record {
     string lastUpdated;
 };
 
-public type ErrorResponse record { 
+public type ErrorResponse record {
     int code;
     string message;
     string description;

@@ -17,8 +17,9 @@
 // ------------------------------------------------------------------------
 import cellery_hub_api/db;
 import cellery_hub_api/constants;
-import ballerina/io;
 import ballerina/log;
+import ballerina/mysql;
+import ballerina/io;
 
 public function createOrg(http:Request createOrgReq, gen:OrgCreateRequest createOrgsBody) returns http:Response {
     if (createOrgReq.hasHeader(constants:AUTHENTICATED_USER)) {
@@ -128,4 +129,25 @@ public function getImageByImageName(http:Request getImageRequest, string orgName
     }
 
     return buildUnknownErrorResponse();
+}
+
+public function getArtifact (http:Request getArtifactReq, string orgName, string imageName, string artifactVersion) returns http:Response|error{
+    json | error res = db:retrieveArtifact(orgName, imageName, artifactVersion);
+    if (res is json) {
+        if (res != null) {
+            http:Response getArtifactRes = new;
+            getArtifactRes.statusCode = http:OK_200;
+            getArtifactRes.setJsonPayload(untaint res);
+            log:printDebug("Successfully fetched organization " + orgName);
+            return getArtifactRes;
+        } else {
+            string errMsg = "Unable to fetch artifact. ";
+            string errDes = io:sprintf("There is no artifact named \'%s/%s:%s\'" ,orgName, imageName, artifactVersion);
+            log:printError(errMsg + errDes);
+            return buildErrorResponse(http:NOT_FOUND_404, constants:API_ERROR_CODE, errMsg, errDes);
+        }
+    } else {
+        log:printError("Unable to fetch artifact", err = res);
+        return buildUnknownErrorResponse();
+    }
 }
