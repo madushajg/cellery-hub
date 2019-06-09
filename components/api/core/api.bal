@@ -40,6 +40,28 @@ listener http:Listener ep = new(9090, config = { filters: [catpchaFilter]});
 service CelleryHubAPI on ep {
 
     @openapi:ResourceInfo {
+        summary: "Retrieve organizations",
+        description: "Retrieve organizations",
+        parameters: [
+            {
+                name: "orgName",
+                inInfo: "query",
+                paramType: "string",
+                description: "Name of the organization",
+                allowEmptyValue: ""
+            }
+        ]
+    }
+    @http:ResourceConfig {
+        methods:["GET"],
+        path:"/orgs"
+    }
+    resource function listOrg (http:Caller outboundEp, http:Request _listOrgReq) returns error? {
+        http:Response _listOrgRes = listOrg(_listOrgReq);
+        error? x = outboundEp->respond(_listOrgRes);
+    }
+
+    @openapi:ResourceInfo {
         summary: "Create organization"
     }
     @http:ResourceConfig {

@@ -21,6 +21,15 @@ import ballerina/log;
 import ballerina/mysql;
 import ballerina/io;
 
+public function listOrg (http:Request _listOrgReq) returns http:Response {
+    // stub code - fill as necessary
+    http:Response _listOrgRes = new;
+    string _listOrgPayload = "Sample listOrg Response";
+    _listOrgRes.setTextPayload(_listOrgPayload);
+
+	return _listOrgRes;
+}
+
 public function createOrg(http:Request createOrgReq, gen:OrgCreateRequest createOrgsBody) returns http:Response {
     if (createOrgReq.hasHeader(constants:AUTHENTICATED_USER)) {
         boolean | error isMatch = createOrgsBody.orgName.matches("^[a-z0-9]+(-[a-z0-9]+)*$");
