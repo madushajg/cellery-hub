@@ -25,17 +25,27 @@ import (
 	"os"
 	"strconv"
 	"time"
-
-	"github.com/cellery-io/cellery-hub/components/docker-auth/pkg/extension"
 )
 
+//const (
+//	MysqlUserEnvVar             = "MYSQL_USER"
+//	MysqlPasswordEnvVar         = "MYSQL_PASSWORD"
+//	MysqlHostEnvVar             = "MYSQL_HOST"
+//	MysqlPortEnvVar             = "MYSQL_PORT"
+//	MysqlDriver                 = "mysql"
+//	MysqlDbName                 = "CELLERY_HUB"
+//	maxOpenConnectionsEnvVar    = "MAX_OPEN_CONNECTIONS"
+//	maxIdleConnectionsEnvVar    = "MAX_IDLE_CONNECTIONS"
+//	connectionMaxLifetimeEnvVar = "MAX_LIFE_TIME"
+//)
+
 func GetDbConnectionPool() (*sql.DB, error) {
-	dbDriver := extension.MYSQL_DRIVER
-	dbUser := os.Getenv(extension.MYSQL_USER_ENV_VAR)
-	dbPass := os.Getenv(extension.MYSQL_PASSWORD_ENV_VAR)
-	dbName := extension.DB_NAME
-	host := os.Getenv(extension.MYSQL_HOST_ENV_VAR)
-	port := os.Getenv(extension.MYSQL_PORT_ENV_VAR)
+	dbDriver := MysqlDriver
+	dbUser := os.Getenv(MysqlUserEnvVar)
+	dbPass := os.Getenv(MysqlPasswordEnvVar)
+	dbName := MysqlDbName
+	host := os.Getenv(MysqlHostEnvVar)
+	port := os.Getenv(MysqlPortEnvVar)
 	dbPoolConfigurations, err := resolvePoolingConfigurations()
 	if err != nil {
 		log.Printf("No db connction pooling configurations found : %s", err)
@@ -54,10 +64,9 @@ func GetDbConnectionPool() (*sql.DB, error) {
 	}
 	log.Printf("DB connection pool established")
 
-	dbConnection.SetMaxOpenConns(dbPoolConfigurations[extension.MaxIdleConnectionsEnvVar])
-	dbConnection.SetMaxIdleConns(dbPoolConfigurations[extension.ConnectionMaxLifetimeEnvVar])
-	dbConnection.SetConnMaxLifetime(time.Minute * time.Duration(dbPoolConfigurations[extension.
-		ConnectionMaxLifetimeEnvVar]))
+	dbConnection.SetMaxOpenConns(dbPoolConfigurations[maxOpenConnectionsEnvVar])
+	dbConnection.SetMaxIdleConns(dbPoolConfigurations[maxIdleConnectionsEnvVar])
+	dbConnection.SetConnMaxLifetime(time.Minute * time.Duration(dbPoolConfigurations[connectionMaxLifetimeEnvVar]))
 
 	return dbConnection, nil
 }
@@ -65,27 +74,27 @@ func GetDbConnectionPool() (*sql.DB, error) {
 func resolvePoolingConfigurations() (map[string]int, error) {
 	m := make(map[string]int)
 
-	maxOpenConnections, err := strconv.Atoi(os.Getenv(extension.MaxOpenConnectionsEnvVar))
+	maxOpenConnections, err := strconv.Atoi(os.Getenv(maxOpenConnectionsEnvVar))
 	if err != nil {
 		log.Printf("Failed to convert max open connections string into integer : %s", err)
 		return nil, fmt.Errorf("error occurred while converting max open connections string into integer "+
 			" : %v", err)
 	}
-	m[extension.MaxOpenConnectionsEnvVar] = maxOpenConnections
-	maxIdleConnections, err := strconv.Atoi(os.Getenv(extension.MaxIdleConnectionsEnvVar))
+	m[maxOpenConnectionsEnvVar] = maxOpenConnections
+	maxIdleConnections, err := strconv.Atoi(os.Getenv(maxIdleConnectionsEnvVar))
 	if err != nil {
 		log.Printf("Failed to convert max idle connections string into integer : %s", err)
 		return nil, fmt.Errorf("error occurred while converting max idle connections string into integer "+
 			" : %v", err)
 	}
-	m[extension.MaxIdleConnectionsEnvVar] = maxIdleConnections
-	maxLifetime, err := strconv.Atoi(os.Getenv(extension.ConnectionMaxLifetimeEnvVar))
+	m[maxIdleConnectionsEnvVar] = maxIdleConnections
+	maxLifetime, err := strconv.Atoi(os.Getenv(connectionMaxLifetimeEnvVar))
 	if err != nil {
 		log.Printf("Failed to convert max lifetime string into integer : %s", err)
 		return nil, fmt.Errorf("error occurred while converting max lifetime string into integer "+
 			" : %v", err)
 	}
-	m[extension.ConnectionMaxLifetimeEnvVar] = maxLifetime
+	m[connectionMaxLifetimeEnvVar] = maxLifetime
 	log.Printf("Fetched db connection pooling configurations. MaxOpenConns = %d, "+
 		"MaxIdleConns = %d, MaxLifetime = %d", maxOpenConnections, maxIdleConnections, maxLifetime)
 

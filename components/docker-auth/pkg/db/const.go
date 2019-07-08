@@ -16,10 +16,16 @@
  * under the License.
  */
 
-package extension
+package db
 
-const (
-	SuccessExitCode = 0
-	ErrorExitCode   = 1
-	MisuseExitCode  = 2
-)
+const MysqlUserEnvVar = "MYSQL_USER"
+const MysqlPasswordEnvVar = "MYSQL_PASSWORD"
+const MysqlHostEnvVar = "MYSQL_HOST"
+const MysqlPortEnvVar = "MYSQL_PORT"
+const MysqlDriver = "mysql"
+const MysqlDbName = "CELLERY_HUB"
+
+//Environment variables for db connection pooling
+const maxOpenConnectionsEnvVar = "MAX_OPEN_CONNECTIONS"
+const maxIdleConnectionsEnvVar = "MAX_IDLE_CONNECTIONS"
+const connectionMaxLifetimeEnvVar = "MAX_LIFE_TIME"

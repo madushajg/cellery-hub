@@ -16,40 +16,19 @@
  * under the License.
  */
 
-package extension
+package db
 
-const userAdminRole = "admin"
-const userPullRole = "pull"
-const userPushRole = "push"
-
-const MYSQL_USER_ENV_VAR = "MYSQL_USER"
-const MYSQL_PASSWORD_ENV_VAR = "MYSQL_PASSWORD"
-const MYSQL_HOST_ENV_VAR = "MYSQL_HOST"
-const MYSQL_PORT_ENV_VAR = "MYSQL_PORT"
-const MYSQL_DRIVER = "mysql"
-const DB_NAME = "CELLERY_HUB"
-
-const MaxOpenConnectionsEnvVar = "MAX_OPEN_CONNECTIONS"
-const MaxIdleConnectionsEnvVar = "MAX_IDLE_CONNECTIONS"
-const ConnectionMaxLifetimeEnvVar = "MAX_LIFE_TIME"
-
-const pullAction = "pull"
-const publicVisibility = "PUBLIC"
-
-const ExecIdHeaderName = "x-cellery-hub-exec-id"
-
-// db queries
-const getImageAndRoleQuery = "SELECT USER_ROLE, VISIBILITY FROM " +
+const GetImageAndRoleQuery = "SELECT USER_ROLE, VISIBILITY FROM " +
 	"REGISTRY_ORGANIZATION " +
 	"INNER JOIN REGISTRY_ARTIFACT_IMAGE ON REGISTRY_ARTIFACT_IMAGE.ORG_NAME = REGISTRY_ORGANIZATION.ORG_NAME " +
 	"INNER JOIN REGISTRY_ORG_USER_MAPPING ON REGISTRY_ORG_USER_MAPPING.ORG_NAME = REGISTRY_ORGANIZATION.ORG_NAME " +
 	"WHERE REGISTRY_ARTIFACT_IMAGE.IMAGE_NAME=? AND REGISTRY_ORG_USER_MAPPING.USER_UUID=?"
-const getVisibilityQuery = "SELECT VISIBILITY FROM " +
+const GetVisibilityQuery = "SELECT VISIBILITY FROM " +
 	"REGISTRY_ARTIFACT_IMAGE " +
 	"WHERE REGISTRY_ARTIFACT_IMAGE.IMAGE_NAME=? LIMIT 1"
-const getUserAvailabilityQuery = "SELECT 1 FROM " +
+const GetUserAvailabilityQuery = "SELECT 1 FROM " +
 	"REGISTRY_ORG_USER_MAPPING " +
 	"WHERE REGISTRY_ORG_USER_MAPPING.USER_UUID=? AND REGISTRY_ORG_USER_MAPPING.ORG_NAME=?"
-const getUserRoleQuery = "SELECT USER_ROLE FROM " +
+const GetUserRoleQuery = "SELECT USER_ROLE FROM " +
 	"REGISTRY_ORG_USER_MAPPING " +
 	"WHERE REGISTRY_ORG_USER_MAPPING.USER_UUID=? AND REGISTRY_ORG_USER_MAPPING.ORG_NAME=?"

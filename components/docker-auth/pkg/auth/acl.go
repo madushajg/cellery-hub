@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package extension
+package auth
 
 import (
 	"database/sql"
@@ -26,12 +26,22 @@ import (
 	"net"
 	"strings"
 
+	"github.com/cellery-io/cellery-hub/components/docker-auth/pkg/db"
+
 	_ "github.com/go-sql-driver/mysql"
+)
+
+const (
+	userAdminRole    = "admin"
+	userPullRole     = "pull"
+	userPushRole     = "push"
+	pullAction       = "pull"
+	publicVisibility = "PUBLIC"
 )
 
 type Labelstest map[string][]string
 
-type AuthRequestInfo struct {
+type authRequestInfo struct {
 	Account string
 	Type    string
 	Name    string
@@ -41,8 +51,8 @@ type AuthRequestInfo struct {
 	Labels  Labelstest
 }
 
-func ValidateAccess(db *sql.DB, accessToken string, execId string) (bool, error) {
-	var authReqInfo AuthRequestInfo
+func ValidateAccess(dbConn *sql.DB, accessToken string, execId string) (bool, error) {
+	var authReqInfo authRequestInfo
 	err := json.Unmarshal([]byte(accessToken), &authReqInfo)
 	if err != nil {
 		log.Printf("[%s] Unable to unmarshal the json :%s\n", execId, err)
@@ -81,10 +91,10 @@ func ValidateAccess(db *sql.DB, accessToken string, execId string) (bool, error)
 	log.Printf("[%s] Image name is declared as :%s\n", execId, image)
 	if isPullOnly {
 		log.Printf("[%s] Received a pulling task\n", execId)
-		return isAuthorizedToPull(db, authReqInfo.Account, organization, image, execId)
+		return IsAuthorizedToPull(dbConn, authReqInfo.Account, organization, image, execId)
 	} else {
 		log.Printf("[%s] Received a pushing task\n", execId)
-		return isAuthorizedToPush(db, authReqInfo.Account, organization, execId)
+		return IsAuthorizedToPush(dbConn, authReqInfo.Account, organization, execId)
 	}
 }
 
@@ -100,8 +110,8 @@ func getOrganizationAndImage(imageFullName string, execId string) (string, strin
 	}
 }
 
-func checkImageAndRole(db *sql.DB, image, user string, execId string) (string, string, error) {
-	results, err := db.Query(getImageAndRoleQuery, image, user)
+func CheckImageAndRole(dbConn *sql.DB, image, user string, execId string) (string, string, error) {
+	results, err := dbConn.Query(db.GetImageAndRoleQuery, image, user)
 	defer func() {
 		closeResultSet(results, "checkImageAndRole", execId)
 	}()
@@ -122,9 +132,9 @@ func checkImageAndRole(db *sql.DB, image, user string, execId string) (string, s
 	return userRole, visibility, errors.New("image not available")
 }
 
-func getImageVisibility(db *sql.DB, image string, execId string) (string, error) {
+func GetImageVisibility(dbConn *sql.DB, image string, execId string) (string, error) {
 	var visibility = ""
-	results, err := db.Query(getVisibilityQuery, image)
+	results, err := dbConn.Query(db.GetVisibilityQuery, image)
 	defer func() {
 		closeResultSet(results, "getImageVisibility", execId)
 	}()
@@ -143,8 +153,8 @@ func getImageVisibility(db *sql.DB, image string, execId string) (string, error)
 	return visibility, nil
 }
 
-func isUserAvailable(db *sql.DB, organization, user string, execId string) (bool, error) {
-	results, err := db.Query(getUserAvailabilityQuery, user, organization)
+func IsUserAvailable(dbConn *sql.DB, organization, user string, execId string) (bool, error) {
+	results, err := dbConn.Query(db.GetUserAvailabilityQuery, user, organization)
 	defer func() {
 		closeResultSet(results, "isUserAvailable", execId)
 	}()
@@ -161,19 +171,19 @@ func isUserAvailable(db *sql.DB, organization, user string, execId string) (bool
 	}
 }
 
-func isAuthorizedToPull(db *sql.DB, user, organization, image string, execId string) (bool, error) {
+func IsAuthorizedToPull(dbConn *sql.DB, user, organization, image string, execId string) (bool, error) {
 	log.Printf("[%s] %s user is trying to pull the image %s for the organization %s\n",
 		execId, user, image, organization)
 	// check if image PUBLIC
-	visibility, err := getImageVisibility(db, image, execId)
+	visibility, err := GetImageVisibility(dbConn, image, execId)
 	if strings.EqualFold(visibility, publicVisibility) {
 		log.Printf("[%s] Received a public image\n", execId)
 		return true, nil
 	}
-	userRole, visibility, err := checkImageAndRole(db, image, user, execId)
+	userRole, visibility, err := CheckImageAndRole(dbConn, image, user, execId)
 	if err != nil && err.Error() == "image not available" {
 		// Check whether the username exists in the organization when a fresh image come and tries to push
-		return isUserAvailable(db, organization, user, execId)
+		return IsUserAvailable(dbConn, organization, user, execId)
 	} else if err != nil {
 		log.Printf("[%s] User does not have pulling rights\n", execId)
 		return false, err
@@ -188,9 +198,9 @@ func isAuthorizedToPull(db *sql.DB, user, organization, image string, execId str
 	}
 }
 
-func isAuthorizedToPush(db *sql.DB, user, organization string, execId string) (bool, error) {
+func IsAuthorizedToPush(dbConn *sql.DB, user, organization string, execId string) (bool, error) {
 	log.Printf("[%s] User %s is trying to push to organization :%s\n", execId, user, organization)
-	results, err := db.Query(getUserRoleQuery, user, organization)
+	results, err := dbConn.Query(db.GetUserRoleQuery, user, organization)
 	defer func() {
 		closeResultSet(results, "isAuthorizedToPush", execId)
 	}()

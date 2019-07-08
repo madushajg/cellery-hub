@@ -16,22 +16,18 @@
  * under the License.
  */
 
-package extension
+package auth
 
 import (
-	"crypto/rand"
-	"fmt"
-	"log"
+	"bufio"
+	"os"
+	"strings"
 )
 
-func GetExecID() (string, error) {
-	b := make([]byte, 16)
-	_, err := rand.Read(b)
-	if err != nil {
-		log.Println("Error generating uuid :", err)
-		return "", err
-	}
-	uuid := fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
-	log.Printf("Exec ID : %s is generated", uuid)
-	return uuid, nil
+// Read Standard input stream
+func ReadStdIn() string {
+	reader := bufio.NewReader(os.Stdin)
+	text, _ := reader.ReadString('\n')
+	text = strings.Replace(text, "\n", "", -1)
+	return text
 }

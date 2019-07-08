@@ -16,18 +16,11 @@
  * under the License.
  */
 
-package extension
+package constants
 
-import (
-	"bufio"
-	"os"
-	"strings"
-)
+// Exit codes
+const SuccessExitCode = 0
+const ErrorExitCode = 1
+const MisuseExitCode = 2
 
-// Read Standard input stream
-func ReadStdIn() string {
-	reader := bufio.NewReader(os.Stdin)
-	text, _ := reader.ReadString('\n')
-	text = strings.Replace(text, "\n", "", -1)
-	return text
-}
+const ExecIdHeaderName = "x-cellery-hub-exec-id"

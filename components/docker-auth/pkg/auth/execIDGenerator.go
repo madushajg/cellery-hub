@@ -19,24 +19,19 @@
 package auth
 
 import (
-	"database/sql"
+	"crypto/rand"
+	"fmt"
 	"log"
-
-	"github.com/cellery-io/cellery-hub/components/docker-auth/pkg/constants"
 )
 
-func Authorization(dbConn *sql.DB, accessToken string, execId string) int {
-	log.Printf("[%s] Authorization logic handler reached and access will be validated\n", execId)
-	isValid, err := ValidateAccess(dbConn, accessToken, execId)
+func GetExecID() (string, error) {
+	b := make([]byte, 16)
+	_, err := rand.Read(b)
 	if err != nil {
-		log.Printf("[%s] Error occurred while validating the user :%s\n", execId, err)
-		return constants.ErrorExitCode
+		log.Println("Error generating uuid :", err)
+		return "", err
 	}
-	if isValid {
-		log.Printf("[%s] Authorized user. Access granted by authz handler\n", execId)
-		return constants.SuccessExitCode
-	} else {
-		log.Printf("[%s] User access denied by authz handler\n", execId)
-		return constants.ErrorExitCode
-	}
+	uuid := fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
+	log.Printf("Exec ID : %s is generated", uuid)
+	return uuid, nil
 }

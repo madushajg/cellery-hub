@@ -29,7 +29,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cellery-io/cellery-hub/components/docker-auth/pkg/extension"
+	"github.com/cellery-io/cellery-hub/components/docker-auth/pkg/constants"
 
 	"github.com/dgrijalva/jwt-go"
 )
@@ -99,19 +99,19 @@ func Authenticate(uName string, token string, execId string) int {
 		jwtValidity := validateJWT(token, uName, execId)
 		if jwtValidity {
 			log.Printf("[%s] User successfully authenticated. Returning success status code\n", execId)
-			return extension.SuccessExitCode
+			return constants.SuccessExitCode
 		} else {
 			log.Printf("[%s] User failed to authenticate. Returning error status code\n", execId)
-			return extension.ErrorExitCode
+			return constants.ErrorExitCode
 		}
 	} else {
 		log.Printf("[%s] Performing authentication by using access token\n", execId)
 		if validateAccessToken(token, uName, execId) {
 			log.Printf("[%s] User successfully authenticated. Returning success status code\n", execId)
-			return extension.SuccessExitCode
+			return constants.SuccessExitCode
 		} else {
 			log.Printf("[%s] User failed to authenticate. Returning error status code\n", execId)
-			return extension.ErrorExitCode
+			return constants.ErrorExitCode
 		}
 	}
 }
@@ -218,10 +218,13 @@ func validateAccessToken(token string, providedUsername string, execId string) b
 	} else if res.StatusCode != http.StatusOK {
 		log.Printf("[%s] Error while calling IDP, status code :%d. Exiting without authorization\n", execId,
 			res.StatusCode)
-		os.Exit(extension.ErrorExitCode)
+		os.Exit(constants.ErrorExitCode)
 	}
 
-	defer res.Body.Close()
+	defer func() {
+		err := res.Body.Close()
+		log.Printf("[%s] Error while closing response from introspection end point", err)
+	}()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		log.Printf("[%s] Error reading the response from introspection endpoint. Returing without "+

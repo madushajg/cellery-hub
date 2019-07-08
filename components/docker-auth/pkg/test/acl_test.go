@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package extension
+package test
 
 import (
 	"database/sql"
@@ -30,6 +30,10 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/cellery-io/cellery-hub/components/docker-auth/pkg/auth"
+	"github.com/cellery-io/cellery-hub/components/docker-auth/pkg/constants"
+	"github.com/cellery-io/cellery-hub/components/docker-auth/pkg/db"
 )
 
 var dbConnection *sql.DB
@@ -37,17 +41,17 @@ var dbConnection *sql.DB
 const testUser = "testUser"
 
 func createConn() bool {
-	dbDriver := MYSQL_DRIVER
+	dbDriver := db.MysqlDriver
 	dbUser := "root"
 	dbPass := "mysql"
-	dbName := DB_NAME
+	dbName := db.MysqlDbName
 	host := "localhost"
 	port := "3308"
 	var err error
 	dbConnection, err = sql.Open(dbDriver, dbUser+":"+dbPass+"@tcp("+host+":"+port+")/"+dbName)
 	if err != nil {
 		fmt.Println("Error while connecting to the database")
-		os.Exit(ErrorExitCode)
+		os.Exit(constants.ErrorExitCode)
 	}
 	err = dbConnection.Ping()
 	if err != nil {
@@ -61,13 +65,23 @@ func moveFiles(from, to string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer source.Close()
+	defer func() {
+		err := source.Close()
+		if err != nil {
+			log.Printf("Error while closing opened file %s : %s", from, err)
+		}
+	}()
 
 	destination, err := os.OpenFile(to, os.O_RDWR|os.O_CREATE, 0666)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer destination.Close()
+	defer func() {
+		err := destination.Close()
+		if err != nil {
+			log.Printf("Error while closing opened file %s : %s", to, err)
+		}
+	}()
 	_, err = io.Copy(destination, source)
 	if err != nil {
 		log.Fatal(err)
@@ -82,21 +96,21 @@ func makedir(path string) {
 }
 
 func setEnv() {
-	err := os.Setenv(MYSQL_USER_ENV_VAR, "root")
+	err := os.Setenv(db.MysqlUserEnvVar, "root")
 	if err != nil {
-		fmt.Println("Error setting up the environment", MYSQL_USER_ENV_VAR, ":", err)
+		fmt.Println("Error setting up the environment", db.MysqlUserEnvVar, ":", err)
 	}
-	err = os.Setenv(MYSQL_PASSWORD_ENV_VAR, "mysql")
+	err = os.Setenv(db.MysqlPasswordEnvVar, "mysql")
 	if err != nil {
-		fmt.Println("Error setting up the environment", MYSQL_PASSWORD_ENV_VAR, ":", err)
+		fmt.Println("Error setting up the environment", db.MysqlPasswordEnvVar, ":", err)
 	}
-	err = os.Setenv(MYSQL_HOST_ENV_VAR, "localhost")
+	err = os.Setenv(db.MysqlHostEnvVar, "localhost")
 	if err != nil {
-		fmt.Println("Error setting up the environment", MYSQL_HOST_ENV_VAR, ":", err)
+		fmt.Println("Error setting up the environment", db.MysqlHostEnvVar, ":", err)
 	}
-	err = os.Setenv(MYSQL_PORT_ENV_VAR, "3308")
+	err = os.Setenv(db.MysqlPortEnvVar, "3308")
 	if err != nil {
-		fmt.Println("Error setting up the environment", MYSQL_PORT_ENV_VAR, ":", err)
+		fmt.Println("Error setting up the environment", db.MysqlPortEnvVar, ":", err)
 	}
 }
 
@@ -107,8 +121,8 @@ func TestMain(m *testing.M) {
 	moveFiles("../../../../deployment/mysql/dbscripts/init.sql", "../../target/test/mysql_scripts/1_init.sql")
 	moveFiles("../../test/data.sql", "../../target/test/mysql_scripts/2_data.sql")
 	setEnv()
-	fmt.Println("User:", os.Getenv(MYSQL_USER_ENV_VAR), "pass:", os.Getenv(MYSQL_PASSWORD_ENV_VAR), "host::",
-		os.Getenv(MYSQL_PORT_ENV_VAR))
+	fmt.Println("User:", os.Getenv(db.MysqlUserEnvVar), "pass:", os.Getenv(db.MysqlPasswordEnvVar), "host::",
+		os.Getenv(db.MysqlPortEnvVar))
 	path, err := filepath.Abs("../../target/test/mysql_scripts")
 	if err != nil {
 		fmt.Println("Could not resolve absolute path :", err)
@@ -172,7 +186,7 @@ func TestValidateAccess(t *testing.T) {
 			" {\"isAuthSuccess\":[\"true\"]}}"},
 	}
 	for _, value := range values {
-		isAuthorized, err := ValidateAccess(dbConnection, value.text, testUser)
+		isAuthorized, err := auth.ValidateAccess(dbConnection, value.text, testUser)
 		if err != nil {
 			log.Println("Error while validating the access token :", err)
 		}
@@ -203,7 +217,7 @@ func TestInvalidAccess(t *testing.T) {
 			" {\"isAuthSuccess\":[\"true\"]}}"},
 	}
 	for _, value := range values {
-		isAuthorized, err := ValidateAccess(dbConnection, value.text, testUser)
+		isAuthorized, err := auth.ValidateAccess(dbConnection, value.text, testUser)
 		if err != nil {
 			log.Println("Error while validating the access token :", err)
 		}
@@ -222,7 +236,7 @@ func TestIsAuthorizedToPush(t *testing.T) {
 		{"admin.com", "cellery"},
 	}
 	for _, value := range values {
-		isAuthorized, err := isAuthorizedToPush(dbConnection, value.username, value.organization, testUser)
+		isAuthorized, err := auth.IsAuthorizedToPush(dbConnection, value.username, value.organization, testUser)
 		if !isAuthorized {
 			t.Error("Cannot authorize ", value.username, "for ", value.organization, " organization")
 		}
@@ -243,7 +257,7 @@ func TestIsAuthorizedToPull(t *testing.T) {
 		{"ibm.com", "cellery", "image"},
 	}
 	for _, value := range values {
-		isAuthorized, err := isAuthorizedToPull(dbConnection, value.username, value.organization, value.image, testUser)
+		isAuthorized, err := auth.IsAuthorizedToPull(dbConnection, value.username, value.organization, value.image, testUser)
 		if err != nil {
 			log.Println("Error while validating the access token :", err)
 		}
@@ -264,7 +278,7 @@ func TestCheckImage(t *testing.T) {
 		{"wso2.com", "image", "public", "push"},
 	}
 	for _, value := range values {
-		role, visib, err := checkImageAndRole(dbConnection, value.image, value.username, testUser)
+		role, visib, err := auth.CheckImageAndRole(dbConnection, value.image, value.username, testUser)
 		if err != nil {
 			log.Println("Error while validating the access token :", err)
 		}
@@ -285,7 +299,7 @@ func TestIsUserAvailable(t *testing.T) {
 		{"cellery", "admin.com"},
 	}
 	for _, value := range values {
-		isAvailable, err := isUserAvailable(dbConnection, value.organization, value.username, testUser)
+		isAvailable, err := auth.IsUserAvailable(dbConnection, value.organization, value.username, testUser)
 		if !isAvailable {
 			t.Error("For username " + value.username + " user is " + value.organization + " invalid")
 		}
@@ -304,7 +318,7 @@ func TestGetImageVisibility(t *testing.T) {
 		{"newImage", "private"},
 	}
 	for _, value := range values {
-		visibility, err := getImageVisibility(dbConnection, value.image, testUser)
+		visibility, err := auth.GetImageVisibility(dbConnection, value.image, testUser)
 		if err != nil {
 			log.Println("Error while validating the access token :", err)
 		}
@@ -320,5 +334,10 @@ func teardown() {
 	if err != nil {
 		fmt.Println("Error in executing the docker cleanup command :", err)
 	}
-	defer dbConnection.Close()
+	defer func() {
+		err := dbConnection.Close()
+		if err != nil {
+			log.Println("Error while closing the db connection :", err)
+		}
+	}()
 }
