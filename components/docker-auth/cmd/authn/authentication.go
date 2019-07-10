@@ -26,8 +26,6 @@ import (
 	"strings"
 
 	"github.com/cellery-io/cellery-hub/components/docker-auth/pkg/auth"
-
-	"github.com/cellery-io/cellery-hub/components/docker-auth/pkg/constants"
 )
 
 const (
@@ -41,19 +39,19 @@ func main() {
 		err = file.Close()
 		if err != nil {
 			log.Printf("Error while closing the file : %s\n", err)
-			os.Exit(constants.MisuseExitCode)
+			os.Exit(auth.MisuseExitCode)
 		}
 	}()
 	if err != nil {
 		log.Println("Error creating the file :", err)
-		os.Exit(constants.ErrorExitCode)
+		os.Exit(auth.ErrorExitCode)
 	}
 	log.SetOutput(file)
 
 	execId, err := auth.GetExecID()
 	if err != nil {
 		log.Printf("Error in generating the execId : %s\n", err)
-		os.Exit(constants.ErrorExitCode)
+		os.Exit(auth.ErrorExitCode)
 	}
 
 	text := auth.ReadStdIn()
@@ -62,7 +60,7 @@ func main() {
 
 	if len(credentials) != 2 {
 		log.Printf("[%s] Cannot parse the Input from the Auth service", execId)
-		os.Exit(constants.ErrorExitCode)
+		os.Exit(auth.ErrorExitCode)
 	}
 	uName := credentials[0]
 	incomingToken := credentials[1]
@@ -77,13 +75,13 @@ func main() {
 	url := resolveAuthenticationUrl(execId)
 	if url == "" {
 		log.Printf("[%s] Authentication end point not found. Exiting with error exit code", execId)
-		os.Exit(constants.ErrorExitCode)
+		os.Exit(auth.ErrorExitCode)
 	}
 	payload := strings.NewReader("{\"uName\":\"" + uName + "\",\"token\":\"" + token + "\"}")
 
 	log.Printf("[%s] Calling %s", execId, url)
 	req, _ := http.NewRequest("POST", url, payload)
-	req.Header.Add(constants.ExecIdHeaderName, execId)
+	req.Header.Add(auth.ExecIdHeaderName, execId)
 	res, _ := http.DefaultClient.Do(req)
 
 	defer func() {
@@ -101,18 +99,18 @@ func main() {
 		if isPing {
 			log.Printf("[%s] Since this is a ping request, exiting with auth fail status without passing to "+
 				" authorization filter\n", execId)
-			os.Exit(constants.ErrorExitCode)
+			os.Exit(auth.ErrorExitCode)
 		} else {
 			log.Printf("[%s] Failed authentication. But passing to authorization filter", execId)
 			addAuthenticationLabel(false, execId)
-			os.Exit(constants.SuccessExitCode)
+			os.Exit(auth.SuccessExitCode)
 		}
 	}
 	if res.StatusCode == http.StatusOK {
 		log.Printf("[%s] User successfully authenticated by validating token. Exiting with success exit code",
 			execId)
 		addAuthenticationLabel(true, execId)
-		os.Exit(constants.SuccessExitCode)
+		os.Exit(auth.SuccessExitCode)
 	}
 }
 
@@ -138,6 +136,6 @@ func addAuthenticationLabel(isAuthenticated bool, execId string) {
 	_, err := os.Stdout.WriteString(label)
 	if err != nil {
 		log.Printf("[%s] Error in writing to standard output. Hence failing authentication. No authorizatino done", err)
-		os.Exit(constants.ErrorExitCode)
+		os.Exit(auth.ErrorExitCode)
 	}
 }

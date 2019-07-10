@@ -21,8 +21,6 @@ package auth
 import (
 	"database/sql"
 	"log"
-
-	"github.com/cellery-io/cellery-hub/components/docker-auth/pkg/constants"
 )
 
 func Authorization(dbConn *sql.DB, accessToken string, execId string) int {
@@ -30,13 +28,13 @@ func Authorization(dbConn *sql.DB, accessToken string, execId string) int {
 	isValid, err := ValidateAccess(dbConn, accessToken, execId)
 	if err != nil {
 		log.Printf("[%s] Error occurred while validating the user :%s\n", execId, err)
-		return constants.ErrorExitCode
+		return ErrorExitCode
 	}
 	if isValid {
 		log.Printf("[%s] Authorized user. Access granted by authz handler\n", execId)
-		return constants.SuccessExitCode
+		return SuccessExitCode
 	} else {
 		log.Printf("[%s] User access denied by authz handler\n", execId)
-		return constants.ErrorExitCode
+		return ErrorExitCode
 	}
 }

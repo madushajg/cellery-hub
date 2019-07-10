@@ -32,7 +32,6 @@ import (
 	"time"
 
 	"github.com/cellery-io/cellery-hub/components/docker-auth/pkg/auth"
-	"github.com/cellery-io/cellery-hub/components/docker-auth/pkg/constants"
 	"github.com/cellery-io/cellery-hub/components/docker-auth/pkg/db"
 )
 
@@ -51,7 +50,7 @@ func createConn() bool {
 	dbConnection, err = sql.Open(dbDriver, dbUser+":"+dbPass+"@tcp("+host+":"+port+")/"+dbName)
 	if err != nil {
 		fmt.Println("Error while connecting to the database")
-		os.Exit(constants.ErrorExitCode)
+		os.Exit(auth.ErrorExitCode)
 	}
 	err = dbConnection.Ping()
 	if err != nil {

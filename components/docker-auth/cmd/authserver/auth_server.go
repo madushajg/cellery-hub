@@ -29,7 +29,6 @@ import (
 	"github.com/cellery-io/cellery-hub/components/docker-auth/pkg/db"
 
 	"github.com/cellery-io/cellery-hub/components/docker-auth/pkg/auth"
-	"github.com/cellery-io/cellery-hub/components/docker-auth/pkg/constants"
 )
 
 type AuthParams struct {
@@ -41,19 +40,19 @@ func main() {
 	authServerPort := os.Getenv("AUTH_SERVER_PORT")
 	if len(authServerPort) == 0 {
 		log.Printf("Failed to start the auth server : AUTH_SERVER_PORT environment variable is empty\n")
-		os.Exit(constants.ErrorExitCode)
+		os.Exit(auth.ErrorExitCode)
 	}
 	log.Printf("Auth server is starting on port %s", authServerPort)
 	dbConnectionPool, err := db.GetDbConnectionPool()
 	if err != nil {
 		log.Printf("Failed to establish the MySql connection in Auth server : %s\n", err)
-		os.Exit(constants.ErrorExitCode)
+		os.Exit(auth.ErrorExitCode)
 	}
 
 	http.HandleFunc("/authentication", func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Authentication endpoint reached")
 
-		execId := r.Header.Get(constants.ExecIdHeaderName)
+		execId := r.Header.Get(auth.ExecIdHeaderName)
 		decoder := json.NewDecoder(r.Body)
 		var authParams AuthParams
 		err := decoder.Decode(&authParams)
@@ -66,7 +65,7 @@ func main() {
 
 		authnRes := auth.Authenticate(authParams.UName, authParams.Token, execId)
 
-		if authnRes == constants.SuccessExitCode {
+		if authnRes == auth.SuccessExitCode {
 			log.Printf("[%s] Authentication Success. Writing status code %d as response", execId,
 				http.StatusOK)
 			w.WriteHeader(http.StatusOK)
@@ -80,7 +79,7 @@ func main() {
 	http.HandleFunc("/authorization", func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Authorization endpoint reached")
 
-		execId := r.Header.Get(constants.ExecIdHeaderName)
+		execId := r.Header.Get(auth.ExecIdHeaderName)
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			log.Printf("[%s] Error occured while reading POST request for authorization : %s", execId, err)
@@ -90,7 +89,7 @@ func main() {
 
 		authzRes := auth.Authorization(dbConnectionPool, string(body), execId)
 
-		if authzRes == constants.SuccessExitCode {
+		if authzRes == auth.SuccessExitCode {
 			log.Printf("[%s] Authorization Success. Writing status code %d as response", execId,
 				http.StatusOK)
 			w.WriteHeader(http.StatusOK)

@@ -25,8 +25,6 @@ import (
 	"strings"
 
 	"github.com/cellery-io/cellery-hub/components/docker-auth/pkg/auth"
-
-	"github.com/cellery-io/cellery-hub/components/docker-auth/pkg/constants"
 )
 
 const (
@@ -52,7 +50,7 @@ func main() {
 	execId, err := auth.GetExecID()
 	if err != nil {
 		log.Printf("Error in generating the execId : %s\n", err)
-		os.Exit(constants.ErrorExitCode)
+		os.Exit(auth.ErrorExitCode)
 	}
 
 	accessToken := auth.ReadStdIn()
@@ -61,14 +59,14 @@ func main() {
 	url := resolveAuthorizationUrl(execId)
 	if url == "" {
 		log.Printf("[%s] Authorization end point not found. Exiting with error exit code", execId)
-		os.Exit(constants.ErrorExitCode)
+		os.Exit(auth.ErrorExitCode)
 	}
 
 	payload := strings.NewReader(accessToken)
 	log.Printf("[%s] Calling %s with accessToken : %s as payload", execId, url, accessToken)
 
 	req, _ := http.NewRequest("POST", url, payload)
-	req.Header.Add(constants.ExecIdHeaderName, execId)
+	req.Header.Add(auth.ExecIdHeaderName, execId)
 
 	res, _ := http.DefaultClient.Do(req)
 
@@ -84,11 +82,11 @@ func main() {
 
 	if res.StatusCode == http.StatusUnauthorized {
 		log.Printf("[%s] Unauthorized request. Exiting with error exit code", execId)
-		os.Exit(constants.ErrorExitCode)
+		os.Exit(auth.ErrorExitCode)
 	}
 	if res.StatusCode == http.StatusOK {
 		log.Printf("[%s] Authorized request. Exiting with success exit code", execId)
-		os.Exit(constants.SuccessExitCode)
+		os.Exit(auth.SuccessExitCode)
 	}
 }
 

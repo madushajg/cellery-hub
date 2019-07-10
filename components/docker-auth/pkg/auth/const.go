@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package constants
+package auth
 
 // Exit codes
 const SuccessExitCode = 0

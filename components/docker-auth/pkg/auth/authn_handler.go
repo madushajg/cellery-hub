@@ -29,8 +29,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cellery-io/cellery-hub/components/docker-auth/pkg/constants"
-
 	"github.com/dgrijalva/jwt-go"
 )
 
@@ -99,19 +97,19 @@ func Authenticate(uName string, token string, execId string) int {
 		jwtValidity := validateJWT(token, uName, execId)
 		if jwtValidity {
 			log.Printf("[%s] User successfully authenticated. Returning success status code\n", execId)
-			return constants.SuccessExitCode
+			return SuccessExitCode
 		} else {
 			log.Printf("[%s] User failed to authenticate. Returning error status code\n", execId)
-			return constants.ErrorExitCode
+			return ErrorExitCode
 		}
 	} else {
 		log.Printf("[%s] Performing authentication by using access token\n", execId)
 		if validateAccessToken(token, uName, execId) {
 			log.Printf("[%s] User successfully authenticated. Returning success status code\n", execId)
-			return constants.SuccessExitCode
+			return SuccessExitCode
 		} else {
 			log.Printf("[%s] User failed to authenticate. Returning error status code\n", execId)
-			return constants.ErrorExitCode
+			return ErrorExitCode
 		}
 	}
 }
@@ -218,7 +216,7 @@ func validateAccessToken(token string, providedUsername string, execId string) b
 	} else if res.StatusCode != http.StatusOK {
 		log.Printf("[%s] Error while calling IDP, status code :%d. Exiting without authorization\n", execId,
 			res.StatusCode)
-		os.Exit(constants.ErrorExitCode)
+		os.Exit(ErrorExitCode)
 	}
 
 	defer func() {
