@@ -32,7 +32,7 @@ http:ListenerConfiguration celleryHubAPIEPConfig = {
         keyFile: config:getAsString("security.keyfile")
     },
     filters: [
-        new filter:validateRequestFilter(),
+        //new filter:validateRequestFilter(),
         new filter:CaptchaRequestFilter()
     ]
 };

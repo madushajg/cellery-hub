@@ -15,17 +15,17 @@
 // limitations under the License
 //
 // ------------------------------------------------------------------------
-import ballerina/io;
 import ballerina/config;
+import ballerina/io;
 import ballerinax/java.jdbc;
 
 jdbc:Client connection = new ({
         url: io:sprintf("jdbc:mysql://%s:%s/%s",config:getAsString("database.host"), config:getAsInt("database.port"),
-        config:getAsString("database.default")),
+        config:getAsString("database.default")),       
         username: config:getAsString("database.user"),
         password: config:getAsString("database.password"),
         dbOptions: {
-                useSSL: true,
+                useSSL: false,
                 allowPublicKeyRetrieval: true
         }
 });
