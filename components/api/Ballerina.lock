@@ -1,0 +1,84 @@
+org_name = "cellery_hub_api"
+version = "0.1.0"
+lockfile_version = "1.0.0"
+ballerina_version = "1.0.1"
+
+[[imports."cellery_hub_api/db:0.1.0"]]
+org_name = "ballerinax"
+name = "java.jdbc"
+version = "0.0.0"
+
+[[imports."cellery_hub_api/db:0.1.0"]]
+org_name = "cellery_hub_api"
+name = "gen"
+version = "0.1.0"
+
+[[imports."cellery_hub_api/idp:0.1.0"]]
+org_name = "cellery_hub_api"
+name = "constants"
+version = "0.1.0"
+
+[[imports."cellery_hub_api/idp:0.1.0"]]
+org_name = "cellery_hub_api"
+name = "gen"
+version = "0.1.0"
+
+[[imports."cellery_hub_api/docker_registry:0.1.0"]]
+org_name = "cellery_hub_api"
+name = "constants"
+version = "0.1.0"
+
+[[imports."cellery_hub_api/core:0.1.0"]]
+org_name = "cellery_hub_api"
+name = "filter"
+version = "0.1.0"
+
+[[imports."cellery_hub_api/core:0.1.0"]]
+org_name = "cellery_hub_api"
+name = "constants"
+version = "0.1.0"
+
+[[imports."cellery_hub_api/core:0.1.0"]]
+org_name = "cellery_hub_api"
+name = "gen"
+version = "0.1.0"
+
+[[imports."cellery_hub_api/core:0.1.0"]]
+org_name = "cellery_hub_api"
+name = "db"
+version = "0.1.0"
+
+[[imports."cellery_hub_api/core:0.1.0"]]
+org_name = "cellery_hub_api"
+name = "idp"
+version = "0.1.0"
+
+[[imports."cellery_hub_api/core:0.1.0"]]
+org_name = "ballerinax"
+name = "java.jdbc"
+version = "0.0.0"
+
+[[imports."cellery_hub_api/core:0.1.0"]]
+org_name = "cellery_hub_api"
+name = "docker_registry"
+version = "0.1.0"
+
+[[imports."cellery_hub_api/validator:0.1.0"]]
+org_name = "cellery_hub_api"
+name = "constants"
+version = "0.1.0"
+
+[[imports."cellery_hub_api/filter:0.1.0"]]
+org_name = "cellery_hub_api"
+name = "db"
+version = "0.1.0"
+
+[[imports."cellery_hub_api/filter:0.1.0"]]
+org_name = "cellery_hub_api"
+name = "constants"
+version = "0.1.0"
+
+[[imports."cellery_hub_api/filter:0.1.0"]]
+org_name = "cellery_hub_api"
+name = "idp"
+version = "0.1.0"
