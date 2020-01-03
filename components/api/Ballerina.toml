@@ -8,6 +8,6 @@ target = "java8"
     [[platform.libraries]]
     artifactId = "mysql-connector-java"
     version = "5.1.6"
-    path = "./src/db/resources/mysql-connector-java-5.1.6.jar"
+    path = "./src/db/libs/mysql-connector-java-5.1.6.jar"
     groupId = "mysql"
     modules = ["core"]

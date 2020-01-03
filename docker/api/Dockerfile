@@ -16,7 +16,7 @@
 #
 # ------------------------------------------------------------------------
 
-FROM ballerina/ballerina:1.0.3 as builder
+FROM ballerina/ballerina:1.0.5 as builder
 LABEL MAINTAINER="WSO2 Cellery Maintainers <dev@wso2.org>"
 
 ARG PROJECT_DIR="/workspace"
@@ -30,7 +30,7 @@ USER ballerina
 
 RUN ballerina build --all --experimental
 
-FROM ballerina/ballerina:1.0.3
+FROM ballerina/ballerina:1.0.5
 
 ARG WORK_DIR="/home/ballerina"
 WORKDIR ${WORK_DIR}

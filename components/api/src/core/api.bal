@@ -19,7 +19,6 @@
 import ballerina/config;
 import ballerina/http;
 import ballerina/log;
-//import ballerina/openapi;
 import cellery_hub_api/filter;
 import cellery_hub_api/constants;
 import cellery_hub_api/gen;
@@ -38,10 +37,6 @@ http:ListenerConfiguration celleryHubAPIEPConfig = {
 };
 
 listener http:Listener ep = new(9090, config = celleryHubAPIEPConfig);
-
-//@openapi:ServiceInfo {
-//    contract: "/Users/madushagunasekara/go_workspace/src/github.com/cellery-io/cellery-hub/docker/api/target/src/core/resources/CelleryHubApi.yaml"
-//}
 
 @http:ServiceConfig {
     basePath: "/api/0.1.0",

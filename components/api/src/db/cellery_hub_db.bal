@@ -169,8 +169,8 @@ public function getUserArtifact(string userId, string orgName, string imageName,
 
 public function getMemberOrgsUsers(string userId, string orgName, int offset, int resultLimit)
 returns @tainted table<gen:User> | error {
-    log:printDebug(io:sprintf("Performing data retrieval of users for organization: %s, user: %s , with offset %d,
-    and result limit : %d", orgName, userId, offset, resultLimit));
+    log:printDebug(io:sprintf("Performing data retrieval of users for organization: %s, user: %s , with offset %d,"+
+    " and result limit : %d", orgName, userId, offset, resultLimit));
     table<gen:User> res = check connection->select(GET_MEMBERS_ORG_USERS, gen:User, userId,
     orgName, resultLimit, offset);
     return res;

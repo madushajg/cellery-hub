@@ -49,7 +49,7 @@ public function getTokenDetails(string token) returns @tainted (TokenDetail | er
             return err;
         }
         json result = check response.getJsonPayload();
-        log:printDebug(io:sprintf("Response json from the introspection endpoint is %s", check string.constructFrom(result)));
+        log:printDebug(io:sprintf("Response json from the introspection endpoint is %s", result));
         boolean isValid = check boolean.constructFrom(check result.active);
         string fullyQualifiedUsername = check string.constructFrom(check result.username);
         TokenDetail tokenDetail = {

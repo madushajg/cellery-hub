@@ -122,8 +122,8 @@ public function extractSubject(string jwt) returns @tainted (error | string){
 public function validateUsername(string token, string userId) returns error? {
     TokenDetail tokenDetail = check getTokenDetails(token);
     if (!stringutils:equalsIgnoreCase(userId, tokenDetail.username)) {
-        error err = error(io:sprintf("%d : Authenticated user does not match with the subject of 
-        the token passed for revoking: %s", 401, userId));
+        error err = error(io:sprintf("%d : Authenticated user does not match with the subject of"+
+        "the token passed for revoking: %s", 401, userId));
         return err;
     }
 }

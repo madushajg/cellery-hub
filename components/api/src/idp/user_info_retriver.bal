@@ -99,7 +99,7 @@ public function getUserInfo(string userId) returns @tainted (UserInfo? | error) 
         userInfoCache.put(userId, <@untainted> userInfo);
         return userInfo;
     }
-    log:printDebug(io:sprintf("More than 1 user found for the given user ID hence not returning user info for user
-     : \'%s\'", userId));
+    log:printDebug(io:sprintf("More than 1 user found for the given user ID hence not returning user info for user "+
+    ": \'%s\'", userId));
     return;
 }

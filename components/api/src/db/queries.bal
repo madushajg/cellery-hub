@@ -182,7 +182,7 @@ public const string SEARCH_ORG_IMAGES_FOR_USER_QUERY = "SELECT REGISTRY_ARTIFACT
                                     "REGISTRY_ARTIFACT_IMAGE.ORG_NAME IN (SELECT REGISTRY_ORG_USER_MAPPING.ORG_NAME "+
                                     "FROM REGISTRY_ORG_USER_MAPPING WHERE USER_UUID = ?)) "+
                                     "GROUP BY REGISTRY_ARTIFACT_IMAGE.IMAGE_NAME "+
-                                    "ORDER BY $ORDER_BY DESC LIMIT ? OFFSET ?";s
+                                    "ORDER BY $ORDER_BY DESC LIMIT ? OFFSET ?";
 
 public const string SEARCH_PUBLIC_IMAGES_TOTAL_COUNT = "SELECT COUNT(REGISTRY_ARTIFACT_IMAGE.ARTIFACT_IMAGE_ID) AS "+
                                     "IMAGE_COUNT FROM REGISTRY_ARTIFACT_IMAGE WHERE (REGISTRY_ARTIFACT_IMAGE.ORG_NAME "+
